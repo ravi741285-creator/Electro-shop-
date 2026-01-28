@@ -7,113 +7,132 @@
 body{margin:0;font-family:Arial;background:#0f2027;color:#fff}
 header,footer{text-align:center;padding:15px;background:#000}
 .container{padding:15px}
-.login,.admin,.cartBox{background:#fff;color:#000;padding:15px;border-radius:12px;margin-bottom:15px}
-input,textarea{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc}
+.box{background:#fff;color:#000;padding:15px;border-radius:12px;margin-bottom:15px}
+input,textarea,select{width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc}
 button{width:100%;padding:10px;border:none;border-radius:8px;background:#000;color:#fff;margin-top:5px}
-.admin{display:none}
+.hidden{display:none}
 .product{background:#fff;color:#000;border-radius:15px;margin-bottom:15px;overflow:hidden}
 .product img{width:100%;height:200px;object-fit:cover}
 .pcon{padding:12px}
 .old{text-decoration:line-through;color:gray}
 .price{color:green;font-size:18px;font-weight:bold}
 .review{background:#f1f1f1;padding:6px;border-radius:6px;margin-top:6px}
+.categoryBtn{background:#2196f3;margin:4px 2px}
 .whatsapp{background:#25D366;color:#fff;text-align:center;padding:10px;border-radius:8px;text-decoration:none;display:block;margin-top:8px}
-.buy{background:#ff9800}
 .cartBtn{background:#2196f3}
+.buy{background:#ff9800}
 </style>
 </head>
 <body>
 <header>
 <h1>🛒 Electro Shop</h1>
 <p>Online Shopping Hub</p>
-</header>
-<div class="container"><div class="login" id="loginBox">
-<h3>🔐 Seller Login</h3>
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-</div><div class="admin" id="adminPanel">
+</header><div class="container"><!-- USER ACCOUNT --><div class="box" id="userBox">
+<h3>👤 User Account</h3>
+<input id="uName" placeholder="First Name">
+<input id="uSurname" placeholder="Surname">
+<input id="uPhone" placeholder="Mobile Number">
+<input id="uEmail" placeholder="Email Address">
+<textarea id="uAddress" placeholder="Full Address"></textarea>
+<button onclick="createAccount()">Create / Login Account</button>
+<p id="userStatus"></p>
+</div><!-- CATEGORY FILTER --><div class="box">
+<h3>📂 Categories</h3>
+<button class="categoryBtn" onclick="filterCat('All')">All</button>
+<button class="categoryBtn" onclick="filterCat('Mobile')">Mobile</button>
+<button class="categoryBtn" onclick="filterCat('Earphone')">Earphone</button>
+<button class="categoryBtn" onclick="filterCat('Charger')">Charger</button>
+<button class="categoryBtn" onclick="filterCat('Speaker')">Speaker</button>
+</div><!-- SELLER PANEL --><div class="box hidden" id="adminPanel">
 <h3>➕ Add Product</h3>
 <input id="pname" placeholder="Product Name">
 <textarea id="pdesc" placeholder="Product Details"></textarea>
+<select id="pcat">
+<option>Mobile</option>
+<option>Earphone</option>
+<option>Charger</option>
+<option>Speaker</option>
+</select>
 <input id="pimg" placeholder="Product Image URL">
 <input id="oldprice" type="number" placeholder="Old Price">
 <input id="newprice" type="number" placeholder="Sale Price">
 <input id="preview" placeholder="Customer Review">
-<input id="trackid" placeholder="Delivery Tracking ID">
+<input id="trackid" placeholder="Tracking ID">
 <button onclick="addProduct()">Add Product</button>
-</div><div class="cartBox" id="cartBox">
+</div><!-- CART --><div class="box">
 <h3>🛍️ My Cart</h3>
 <div id="cartItems"></div>
 <h4 id="total"></h4>
 <button onclick="checkout()">Place Order</button>
 </div><div id="products"></div>
-</div>
-<footer>© Electro Shop</footer><script>
-const SELLER_USER='admin',SELLER_PASS='1234';
-function login(){
- if(username.value===SELLER_USER && password.value===SELLER_PASS){
-  loginBox.style.display='none';
-  adminPanel.style.display='block';
- }else alert('Wrong Login');
+</div><footer>© Electro Shop</footer><script>
+/* USER ACCOUNT */
+function createAccount(){
+ if(!uName.value||!uSurname.value||!uPhone.value||!uEmail.value||!uAddress.value){
+  alert('Please fill all details');return;
+ }
+ localStorage.setItem('user',JSON.stringify({
+  name:uName.value,
+  surname:uSurname.value,
+  phone:uPhone.value,
+  email:uEmail.value,
+  address:uAddress.value
+ }));
+ userStatus.innerText='Welcome '+uName.value+' '+uSurname.value;
+ adminPanel.classList.remove('hidden');
+}
+ localStorage.setItem('user',JSON.stringify({name:uName.value,phone:uPhone.value}));
+ userStatus.innerText='Welcome '+uName.value;
+ adminPanel.classList.remove('hidden');
 }
 
 let products=JSON.parse(localStorage.getItem('products'))||[];
 let cart=JSON.parse(localStorage.getItem('cart'))||[];
+let currentCat='All';
 const productsBox=document.getElementById('products');
 const cartItems=document.getElementById('cartItems');
 
 function renderProducts(){
  productsBox.innerHTML='';
- products.forEach((p,i)=>{
-  productsBox.innerHTML+=`
-  <div class="product">
-   <img src="${p.img}">
-   <div class="pcon">
-    <h3>${p.name}</h3>
-    <p>${p.desc}</p>
-    <p class="old">₹${p.old}</p>
-    <p class="price">₹${p.price}</p>
-    <div class="review">${p.review}</div>
-    <div>📦 Tracking ID: <b>${p.track}</b></div>
-    <button class="cartBtn" onclick="addToCart(${i})">Add to Cart</button>
-    <button class="buy" onclick="buyNow(${i})">Buy Now</button>
-    <a class="whatsapp" target="_blank" href="https://wa.me/919166737029?text=I%20want%20to%20buy%20${encodeURIComponent(p.name)}">💬 Chat on WhatsApp</a>
-   </div>
-  </div>`;
- });
+ products.filter(p=>currentCat==='All'||p.cat===currentCat).forEach((p,i)=>{
+ productsBox.innerHTML+=`
+ <div class="product">
+ <img src="${p.img}">
+ <div class="pcon">
+ <h3>${p.name}</h3>
+ <p>${p.desc}</p>
+ <p><b>Category:</b> ${p.cat}</p>
+ <p class="old">₹${p.old}</p>
+ <p class="price">₹${p.price}</p>
+ <div class="review">${p.review}</div>
+ <div>📦 Tracking ID: <b>${p.track}</b></div>
+ <button class="cartBtn" onclick="addToCart(${i})">Add to Cart</button>
+ <button class="buy" onclick="buyNow(${i})">Buy Now</button>
+ <a class="whatsapp" target="_blank" href="https://wa.me/91XXXXXXXXXX?text=I%20want%20to%20buy%20${encodeURIComponent(p.name)}">💬 Chat on WhatsApp</a>
+ </div></div>`});
  localStorage.setItem('products',JSON.stringify(products));
 }
 
+function filterCat(cat){currentCat=cat;renderProducts()}
+
 function addProduct(){
- products.push({name:pname.value,desc:pdesc.value,img:pimg.value,old:oldprice.value,price:newprice.value,review:preview.value||'⭐️⭐️⭐️⭐️',track:trackid.value||'Pending'});
+ products.push({name:pname.value,desc:pdesc.value,cat:pcat.value,img:pimg.value,old:oldprice.value,price:newprice.value,review:preview.value||'⭐️⭐️⭐️⭐️',track:trackid.value||'Pending'});
  renderProducts();
  pname.value=pdesc.value=pimg.value=oldprice.value=newprice.value=preview.value=trackid.value='';
 }
 
-function addToCart(i){
- cart.push(products[i]);
- localStorage.setItem('cart',JSON.stringify(cart));
- renderCart();
-}
-
-function buyNow(i){
- cart=[products[i]];
- localStorage.setItem('cart',JSON.stringify(cart));
- renderCart();
- alert('Proceed to checkout');
-}
+function addToCart(i){cart.push(products[i]);localStorage.setItem('cart',JSON.stringify(cart));renderCart()}
+function buyNow(i){cart=[products[i]];localStorage.setItem('cart',JSON.stringify(cart));renderCart();alert('Proceed to checkout')}
 
 function renderCart(){
- cartItems.innerHTML='';
- let sum=0;
+ cartItems.innerHTML='';let sum=0;
  cart.forEach(p=>{sum+=Number(p.price);cartItems.innerHTML+=`<p>${p.name} - ₹${p.price}</p>`});
  total.innerText='Total: ₹'+sum;
 }
 
 function checkout(){
  if(cart.length===0){alert('Cart empty');return}
- alert('Order placed successfully! Seller will contact you.');
+ alert('Order placed! Seller will contact you.');
  cart=[];localStorage.removeItem('cart');renderCart();
 }
 
