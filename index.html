@@ -1,98 +1,93 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
-  <title>Electro Shop</title>
+  <meta charset="UTF-8">
+  <title>Electro Shop – Shopping Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial; padding: 10px; }
-    .card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 10px; }
-    .old { text-decoration: line-through; color: gray; }
-    .price { color: green; font-size: 18px; }
-    button { padding: 10px; width: 100%; background: black; color: white; border: none; border-radius: 5px; }
+    body { margin:0; font-family: Arial; background:#0f2027; color:#fff; }
+    header, footer { text-align:center; padding:15px; background:#000; }
+    .container { padding:15px; }.login, .admin, .track, .chat { background:#fff; color:#000; padding:15px; border-radius:12px; margin-bottom:15px; }
+input, textarea { width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #ccc; }
+button { width:100%; padding:10px; border:none; border-radius:8px; background:#000; color:#fff; }
+
+.admin { display:none; }
+
+.product { background:#fff; color:#000; border-radius:15px; margin-bottom:15px; overflow:hidden; }
+.product img { width:100%; height:200px; object-fit:cover; }
+.pcon { padding:12px; }
+.old { text-decoration:line-through; color:gray; }
+.price { color:green; font-size:18px; font-weight:bold; }
+.review { background:#f1f1f1; padding:6px; border-radius:6px; margin-top:6px; }
+
+.whatsapp { background:#25D366; color:#fff; text-align:center; padding:10px; border-radius:8px; text-decoration:none; display:block; margin-top:8px; }
+
   </style>
 </head>
-<body>
+<body><header>
+  <h1>🛒 Electro Shop</h1>
+  <p>Online Shopping Hub</p>
+</header><div class="container">  <!-- SELLER LOGIN -->  <div class="login" id="loginBox">
+    <h3>🔐 Seller Login</h3>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>  <!-- ADMIN PANEL -->  <div class="admin" id="adminPanel">
+    <h3>➕ Add Product</h3>
+    <input id="pname" placeholder="Product Name">
+    <textarea id="pdesc" placeholder="Product Details"></textarea>
+    <input id="pimg" placeholder="Product Image URL">
+    <input id="oldprice" type="number" placeholder="Old Price">
+    <input id="newprice" type="number" placeholder="Sale Price">
+    <input id="preview" placeholder="Customer Review">
+    <input id="trackid" placeholder="Delivery Tracking ID">
+    <button onclick="addProduct()">Add Product</button>
+  </div>  <!-- PRODUCTS -->  <div id="products"></div></div><footer>© Electro Shop</footer><script>
+  const SELLER_USER='admin', SELLER_PASS='1234';
 
-<h2>🛒 Electro Shop</h2>
+  function login(){
+    if(username.value===SELLER_USER && password.value===SELLER_PASS){
+      loginBox.style.display='none';
+      adminPanel.style.display='block';
+    } else alert('Wrong Login');
+  }
 
-<div class="card">
-  <h3>Wireless Earbuds</h3>
-  <p class="old">₹1499</p>
-  <p class="price">₹999</p>
-  <button>Add to Cart</button>
-</div>
-
-<div class="card">
-  <h3>Bluetooth Headphones</h3>
-  <p class="old">₹2499</p>
-  <p class="price">₹1799</p>
-  <button>Add to Cart</button>
-</div>
-
-<div class="card">
-  <h3>Smart Watch</h3>
-  <p class="old">₹3999</p>
-  <p class="price">₹2999</p>
-  <button>Add to Cart</button>
-</div>
-
-</body>
-  </html>
-<!DOCTYPE html><html>
-<head>
-  <title>Electro Shop</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial; padding: 10px; background:#f7f7f7; }
-    h2 { margin-bottom: 5px; }
-    .card { background:#fff; border-radius: 12px; padding: 15px; margin: 12px 0; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    .old { text-decoration: line-through; color: gray; }
-    .price { color: green; font-size: 18px; font-weight:bold; }
-    button { padding: 10px; width: 100%; background: black; color: white; border: none; border-radius: 8px; margin-top:8px; }
-    input, textarea { width:100%; padding:8px; margin:5px 0; border-radius:6px; border:1px solid #ccc; }
-    .admin { background:#e9f5ff; padding:15px; border-radius:12px; margin-bottom:20px; }
-  </style>
-</head>
-<body><h2>🛒 Electro Shop</h2>
-<p>Online Shopping App (Like Meesho)</p><!-- ADMIN PRODUCT ADD SECTION --><div class="admin">
-  <h3>➕ Add New Product (Seller Panel)</h3>
-  <input id="pname" placeholder="Product Name">
-  <textarea id="pdesc" placeholder="Product Details"></textarea>
-  <input id="oldprice" placeholder="Old Price" type="number">
-  <input id="newprice" placeholder="Sale Price" type="number">
-  <button onclick="addProduct()">Add Product</button>
-</div><!-- PRODUCT LIST --><div id="products"></div><script>
-  let products = JSON.parse(localStorage.getItem('products')) || [
-    {name:'Wireless Earbuds', desc:'Best sound quality', old:1499, price:999},
-    {name:'Bluetooth Headphones', desc:'Deep bass headphones', old:2499, price:1799},
-    {name:'Smart Watch', desc:'Fitness & smart features', old:3999, price:2999}
-  ];
+  let products = JSON.parse(localStorage.getItem('products')) || [];
+  const productsBox=document.getElementById('products');
 
   function renderProducts(){
-    const box = document.getElementById('products');
-    box.innerHTML = '';
+    productsBox.innerHTML='';
     products.forEach(p=>{
-      box.innerHTML += `
-        <div class="card">
+      productsBox.innerHTML+=`
+      <div class="product">
+        <img src="${p.img}">
+        <div class="pcon">
           <h3>${p.name}</h3>
           <p>${p.desc}</p>
           <p class="old">₹${p.old}</p>
           <p class="price">₹${p.price}</p>
-          <button>Buy Now</button>
-        </div>`;
+          <div class="review">${p.review}</div>
+
+          <div class="track">📦 Tracking ID: <b>${p.track}</b></div>
+
+          <a class="whatsapp" target="_blank" href="https://wa.me/91XXXXXXXXXX?text=Hello%20I%20want%20to%20buy%20${encodeURIComponent(p.name)}">💬 Chat on WhatsApp</a>
+        </div>
+      </div>`;
     });
-    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem('products',JSON.stringify(products));
   }
 
   function addProduct(){
-    const name = pname.value;
-    const desc = pdesc.value;
-    const old = oldprice.value;
-    const price = newprice.value;
-    if(!name || !price) return alert('Fill all details');
-    products.push({name, desc, old, price});
+    products.push({
+      name:pname.value,
+      desc:pdesc.value,
+      img:pimg.value,
+      old:oldprice.value,
+      price:newprice.value,
+      review:preview.value || '⭐️⭐️⭐️⭐️',
+      track:trackid.value || 'Pending'
+    });
     renderProducts();
-    pname.value = pdesc.value = oldprice.value = newprice.value = '';
+    pname.value=pdesc.value=pimg.value=oldprice.value=newprice.value=preview.value=trackid.value='';
   }
 
   renderProducts();
