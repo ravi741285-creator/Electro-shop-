@@ -68,20 +68,30 @@ button{width:100%;padding:10px;border:none;border-radius:8px;background:#000;col
 </div><footer>© Electro Shop</footer><script>
 /* USER ACCOUNT */
 function createAccount(){
- if(!uName.value||!uSurname.value||!uPhone.value||!uEmail.value||!uAddress.value){
-  alert('Please fill all details');return;
- }
- localStorage.setItem('user',JSON.stringify({
-  name:uName.value,
-  surname:uSurname.value,
-  phone:uPhone.value,
-  email:uEmail.value,
-  address:uAddress.value
- }));
- userStatus.innerText='Welcome '+uName.value+' '+uSurname.value;
- adminPanel.classList.remove('hidden');
-}
- localStorage.setItem('user',JSON.stringify({name:uName.value,phone:uPhone.value}));
+  const name = document.getElementById('uName').value;
+  const surname = document.getElementById('uSurname').value;
+  const phone = document.getElementById('uPhone').value;
+  const email = document.getElementById('uEmail').value;
+  const address = document.getElementById('uAddress').value;
+
+  if(!name || !surname || !phone || !email || !address){
+    alert('Please fill all details');
+    return;
+  }
+
+  localStorage.setItem('user', JSON.stringify({
+    name: name,
+    surname: surname,
+    phone: phone,
+    email: email,
+    address: address
+  }));
+
+  document.getElementById('userStatus').innerText =
+    'Welcome ' + name + ' ' + surname;
+
+  alert('Account created successfully');
+} localStorage.setItem('user',JSON.stringify({name:uName.value,phone:uPhone.value}));
  userStatus.innerText='Welcome '+uName.value;
  adminPanel.classList.remove('hidden');
 }
